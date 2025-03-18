@@ -1,4 +1,4 @@
-module github.com/Courtcircuits/optique
+module {{ .Name }}
 
 go 1.24.1
 

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/Courtcircuits/optique/cmd"
+import "{{ .Name }}"
 
 // @title Optique application TO CHANGE
 // @version 1.0

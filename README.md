@@ -1,6 +1,6 @@
-<center><h1><b>(⌐■_■)</b><h1/></center>
+<h1 align="center"><b>(⌐■_■)</b><h1/>
 
-<center><h2>Optique : REST API template for microservices written in Go (a little opinionated)</h2></center>
+<h2 align="center">Optique : REST API template for microservices written in Go (a little opinionated)</h2>
 
 ## Getting Started
 

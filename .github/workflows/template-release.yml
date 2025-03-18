@@ -16,7 +16,7 @@ jobs:
         run: |
           tar -czvf template.tar.gz template
       - name: Upload template
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: template
           path: template.tar.gz

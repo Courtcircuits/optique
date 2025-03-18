@@ -11,20 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Compress /template folder
-        run: zip -r template.zip ./template
-      - name: Create Release of /template folder
-        id: create_release
-        uses: ncipollo/release-action@v1
+        uses: actions/checkout@v4
+      - name: Compress template
+        run: |
+          tar -czvf template.tar.gz template
+      - name: Upload template
+        uses: actions/upload-artifact@v3
         with:
-          name: Template Release
-          tag: template
-          body: Template Release
-          token: ${{ secrets.GITHUB_TOKEN }}
-          allowUpdates: true
-          draft: false
-          prerelease: false
-          artifacts: "./template.zip"
-          artifactContentType: application/zip
-          replacesArtifacts: true
+          name: template
+          path: template.tar.gz

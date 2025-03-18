@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Compress /template folder
+        run: zip -r template.zip ./template
       - name: Create Release of /template folder
         id: create_release
         uses: ncipollo/release-action@v1
@@ -23,6 +25,6 @@ jobs:
           allowUpdates: true
           draft: false
           prerelease: false
-          artifacts: "./template"
+          artifacts: "./template.zip"
           artifactContentType: application/zip
           replacesArtifacts: true

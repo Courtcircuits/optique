@@ -1,6 +1,5 @@
 package main
 
-import "{{ .Name }}"
 
 // @title Optique application TO CHANGE
 // @version 1.0
@@ -9,5 +8,13 @@ import "{{ .Name }}"
 // @contact.url https://github.com/Courtcircuits
 // @contact.email tristan-mihai.radulescu@etu.umontpellier.fr
 func main() {
-	cmd.Execute()
+	conf, err := config.LoadConfig()
+	if err != nil {
+		config.HandleError(err)
+	}
+
+	hello := http.NewHelloController()
+	server := http.NewServer(conf.HTTP.ListenAddr)
+
+	server.Setup(hello).Ignite()
 }

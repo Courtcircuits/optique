@@ -48,6 +48,11 @@ func Initialize(generation Initialization) {
 		fmt.Println("Error cloning template:", err)
 		os.Exit(1)
 	}
+	err = setupGoModule(&generation)
+	if err != nil {
+		fmt.Println("Error setting up go module:", err)
+		os.Exit(1)
+	}
 	err = goBack()
 	if err != nil {
 		fmt.Println("Error going back:", err)
@@ -123,7 +128,7 @@ func cloneTemplate(url string, name string) error {
 
 	entries, err = os.ReadDir(".")
 	for _, entry := range entries {
-		val, err := exec.Command("mv", entry.Name() , current_dir).CombinedOutput()
+		val, err := exec.Command("mv", entry.Name(), current_dir).CombinedOutput()
 		if err != nil {
 			return err
 		}
@@ -137,6 +142,18 @@ func cloneTemplate(url string, name string) error {
 
 	// remove template folder
 	err = os.RemoveAll("template")
+	return nil
+}
+
+func setupGoModule(config *Initialization) error {
+	cmd := exec.Command("go", "mod", "init", config.URL)
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	cmd = exec.Command("gopls", "imports", "-w", "./main.go")
+	if err := cmd.Run(); err != nil {
+		return err
+	}
 	return nil
 }
 

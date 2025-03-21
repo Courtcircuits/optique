@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/Courtcircuits/optique/cli/actions"
 	"github.com/spf13/cobra"
 )
 
@@ -15,6 +14,6 @@ var generateCmd = &cobra.Command{
 	Short: "Bootstrap a new Optique module",
 	Long:  `Generates a new Optique module`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("generate called")
+		actions.GenerateFromForm(args[0])
 	},
 }

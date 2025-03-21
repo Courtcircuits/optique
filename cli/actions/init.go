@@ -16,16 +16,20 @@ type Initialization struct {
 	Version string
 }
 
-var DefaultInitialization = &Initialization{
-	Name:    "optique",
-	URL:     "https://github.com/baptistebronsin/javoue",
-	Version: "latest",
-}
-
 func NewInitialization(name string) Initialization {
-	DefaultInitialization.Name = name
-	StartForm(name)
-	return *DefaultInitialization
+	view, err := views.LaunchInitForm()
+	if err != nil {
+		fmt.Println("Error launching form:", err)
+		os.Exit(1)
+	}
+	view.Repository = name
+	view.Version = "latest"
+	return Initialization{
+		URL:     URL,
+		Name:    name,
+		Version: view.Version,
+	}
+
 }
 
 func Initialize(generation Initialization) {
@@ -64,8 +68,7 @@ func goBack() error {
 }
 
 func cloneTemplate(url string, name string) error {
-	cmd := exec.Command("git", "clone", url, name)
-	views.Load(cmd, "Cloning template")
+	ExecWithLoading("Cloning template", "git", "clone", url, name)
 
 	// go to project folder
 	err := os.Chdir(name)
@@ -117,11 +120,10 @@ func cloneTemplate(url string, name string) error {
 
 	entries, err = os.ReadDir(".")
 	for _, entry := range entries {
-		val, err := exec.Command("mv", entry.Name(), current_dir).CombinedOutput()
+		_, err := exec.Command("mv", entry.Name(), current_dir).CombinedOutput()
 		if err != nil {
 			return err
 		}
-		fmt.Println(string(val))
 	}
 	// move all to parent folder
 	err = goBack()
@@ -135,13 +137,9 @@ func cloneTemplate(url string, name string) error {
 }
 
 func setupGoModule(config *Initialization) error {
-	cmd := exec.Command("go", "mod", "init", config.URL)
-	views.Load(cmd, "Initializing go module")
-	cmd = exec.Command("gopls", "imports", "-w", "./main.go")
-	views.Load(cmd, "Cleaning up imports")
-
-	cmd = exec.Command("go", "mod", "tidy")
-	views.Load(cmd, "Installing dependencies")
+	ExecWithLoading("Initializing module", "go", "mod", "init", config.URL)
+	ExecWithLoading("Cleaning up imports", "gopls", "imports", "-w", "./main.go")
+	ExecWithLoading("Installing dependencies", "go", "mod", "tidy")
 
 	return nil
 }

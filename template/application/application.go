@@ -1,6 +1,6 @@
 package application
 
 type Application interface {
-	Ignite()
-	Stop()
+	Ignite() error
+	Stop() error
 }

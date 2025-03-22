@@ -17,41 +17,41 @@ type Cycle interface {
 }
 
 type cycle struct {
-	repositories []infrastructure.Repository
-	applications []application.Application
+	repos []infrastructure.Repository
+	apps []application.Application
 	shutdown     chan os.Signal
 }
 
 func NewCycle() *cycle {
 	return &cycle{
 		shutdown:     make(chan os.Signal, 1),
-		repositories: []infrastructure.Repository{},
-		applications: []application.Application{},
+		repos: []infrastructure.Repository{},
+		apps: []application.Application{},
 	}
 }
 
-func (c *cycle) AddRepository(repository infrastructure.Repository) {
-	c.repositories = append(c.repositories, repository)
+func (c *cycle) AddRepository(repo infrastructure.Repository) {
+	c.repos = append(c.repos, repo)
 }
 
-func (c *cycle) AddApplications(applications []application.Application) {
-	c.applications = append(c.applications, applications...)
+func (c *cycle) AddApplications(apps []application.Application) {
+	c.apps = append(c.apps, apps...)
 }
 
-func (c *cycle) AddRepositories(repository []infrastructure.Repository) {
-	c.repositories = append(c.repositories, repository...)
+func (c *cycle) AddRepositories(repos []infrastructure.Repository) {
+	c.repos = append(c.repos, repos...)
 }
 
-func (c *cycle) AddApplication(application application.Application) {
-	c.applications = append(c.applications, application)
+func (c *cycle) AddApplication(app application.Application) {
+	c.apps = append(c.apps, app)
 }
 
 func (c *cycle) Setup() error {
-	if len(c.repositories) == 0 {
+	if len(c.repos) == 0 {
 		slog.Info("No repository to setup")
 		return nil
 	}
-	for _, repository := range c.repositories {
+	for _, repository := range c.repos {
 		if err := repository.Setup(); err != nil {
 			return err
 		}
@@ -61,18 +61,18 @@ func (c *cycle) Setup() error {
 
 // Ignite starts the application
 func (c *cycle) Ignite() error {
-	if len(c.applications) == 0 {
+	if len(c.apps) == 0 {
 		slog.Info("No application to start")
 		return nil
 	}
 
-	for _, application := range c.applications {
-		go func(application application.Application) {
-			err := application.Ignite()
+	for _, app := range c.apps {
+		go func(app application.Application) {
+			err := app.Ignite()
 			if err != nil {
 				slog.Error(err.Error())
 			}
-		}(application)
+		}(app)
 	}
 
 	signal.Notify(c.shutdown, os.Interrupt, syscall.SIGTERM)
@@ -88,8 +88,8 @@ func (c *cycle) Ignite() error {
 func (c *cycle) Stop() error {
 	slog.Info("Stopping applications with graceful shutdown")
 	close(c.shutdown)
-	for _, application := range c.applications {
-    err := application.Stop()
+	for _, app := range c.apps {
+    err := app.Stop()
 		if err != nil {
 			return err
 		}

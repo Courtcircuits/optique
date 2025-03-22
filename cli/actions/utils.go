@@ -2,6 +2,7 @@ package actions
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -28,7 +29,9 @@ func ExecWithLoading(label string, name string, commands ...string) error {
 		case <-ctx.Done():
 		}
 	}()
-	if err := exec.CommandContext(ctx, name, commands...).Run(); err != nil {
+	output, err := exec.CommandContext(ctx, name, commands...).CombinedOutput()
+	if err != nil {
+		fmt.Println(string(output))
 		return err
 	}
 	return nil

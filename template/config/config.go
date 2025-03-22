@@ -7,9 +7,8 @@ import (
 )
 
 type Config struct {
-	HTTP struct {
-		ListenAddr string `mapstructure:"listen_addr"`
-	} `mapstructure:"http"`
+	// Bootstrap is a flag to indicate if the application should start in bootstrap mode, meaning that the cycle should setup repositories e.g. for migrations or seeding
+	Bootstrap bool `json:"bootstrap"`
 }
 
 func LoadConfig() (*Config, error) {

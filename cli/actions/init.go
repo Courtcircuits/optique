@@ -8,13 +8,14 @@ import (
 	"github.com/Courtcircuits/optique/cli/views"
 )
 
-const URL = "https://github.com/Courtcircuits/optique/cli"
 
 type Initialization struct {
 	URL     string
 	Name    string
 	Version string
 }
+
+var URL = "https://github.com/Courtcircuits/optique"
 
 func NewInitialization(name string) Initialization {
 	view, err := views.LaunchInitForm()
@@ -25,7 +26,7 @@ func NewInitialization(name string) Initialization {
 	view.Repository = name
 	view.Version = "latest"
 	return Initialization{
-		URL:     URL,
+		URL:     view.Repository,
 		Name:    name,
 		Version: view.Version,
 	}
@@ -38,7 +39,7 @@ func Initialize(generation Initialization) {
 		fmt.Println("Error creating project folder:", err)
 		os.Exit(1)
 	}
-	err = cloneTemplate("https://github.com/Courtcircuits/optique", generation.Name)
+	err = cloneTemplate(URL, generation.Name)
 	if err != nil {
 		fmt.Println("Error cloning template:", err)
 		os.Exit(1)
@@ -137,7 +138,18 @@ func cloneTemplate(url string, name string) error {
 }
 
 func setupGoModule(config *Initialization) error {
-	ExecWithLoading("Initializing module", "go", "mod", "init", config.URL)
+	// go to project folder
+	cur_dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	fmt.Println("Current directory:", cur_dir)
+	err = ExecWithLoading("Initializing module", "go", "mod", "init", config.URL)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Module initialized: %s\n", config.URL)
+
 	ExecWithLoading("Cleaning up imports", "gopls", "imports", "-w", "./main.go")
 	ExecWithLoading("Installing dependencies", "go", "mod", "tidy")
 

@@ -1,5 +1,3 @@
 {
-  "http": {
-    "listen_addr" :":8080"
-  }
+  "bootstrap": true
 }

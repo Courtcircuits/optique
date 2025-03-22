@@ -1,5 +1,10 @@
 package main
 
+import (
+	"log"
+	"os"
+)
+
 
 // @title Optique application TO CHANGE
 // @version 1.0
@@ -12,9 +17,16 @@ func main() {
 	if err != nil {
 		config.HandleError(err)
 	}
+	cycle := NewCycle()
 
-	hello := http.NewHelloController()
-	server := http.NewServer(conf.HTTP.ListenAddr)
+	if conf.Bootstrap {
+		err := cycle.Setup()
+		if err != nil {
+			log.Fatal(err)
+			cycle.Stop()
+			os.Exit(1)
+		}
+	}
 
-	server.Setup(hello).Ignite()
+	err = cycle.Ignite()
 }

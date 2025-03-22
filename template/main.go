@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"os"
 )
 
@@ -22,7 +22,7 @@ func main() {
 	if conf.Bootstrap {
 		err := cycle.Setup()
 		if err != nil {
-			log.Fatal(err)
+			slog.Fatal(err)
 			cycle.Stop()
 			os.Exit(1)
 		}

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -48,7 +48,7 @@ func (c *cycle) AddApplication(application application.Application) {
 
 func (c *cycle) Setup() error {
 	if len(c.repositories) == 0 {
-		log.Info("No repository to setup")
+		slog.Info("No repository to setup")
 		return nil
 	}
 	for _, repository := range c.repositories {
@@ -62,14 +62,14 @@ func (c *cycle) Setup() error {
 // Ignite starts the application
 func (c *cycle) Ignite() error {
 	if len(c.applications) == 0 {
-		log.Info("No application to start")
+		slog.Info("No application to start")
 		return nil
 	}
 
 	for _, application := range c.applications {
 		go func(application application.Application) {
 			if err := application.Ignite(); err != nil {
-				log.Fatal(err)
+				slog.Error(err)
 			}
 		}(application)
 	}
@@ -86,7 +86,7 @@ func (c *cycle) Ignite() error {
 
 // Stop stops the application
 func (c *cycle) Stop() error {
-	log.Info("Stopping applications with graceful shutdown")
+	slog.Info("Stopping applications with graceful shutdown")
 	close(c.shutdown)
 	for _, application := range c.applications {
 		if err := application.Stop(); err != nil {

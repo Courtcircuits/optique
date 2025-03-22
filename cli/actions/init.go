@@ -8,7 +8,6 @@ import (
 	"github.com/Courtcircuits/optique/cli/views"
 )
 
-
 type Initialization struct {
 	URL     string
 	Name    string
@@ -137,6 +136,11 @@ func cloneTemplate(url string, name string) error {
 	return nil
 }
 
+var IMPORT_TO_FIX = []string{
+	"./main.go",
+	"./cycle.go",
+}
+
 func setupGoModule(config *Initialization) error {
 	// go to project folder
 	cur_dir, err := os.Getwd()
@@ -150,7 +154,9 @@ func setupGoModule(config *Initialization) error {
 	}
 	fmt.Printf("Module initialized: %s\n", config.URL)
 
-	ExecWithLoading("Cleaning up imports", "gopls", "imports", "-w", "./main.go")
+	for _, file := range IMPORT_TO_FIX {
+		ExecWithLoading(fmt.Sprintf("Fixing imports for %s\n", file), "gopls", "imports", "-w", file)
+	}
 	ExecWithLoading("Installing dependencies", "go", "mod", "tidy")
 
 	return nil

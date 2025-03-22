@@ -68,8 +68,9 @@ func (c *cycle) Ignite() error {
 
 	for _, application := range c.applications {
 		go func(application application.Application) {
-			if err := application.Ignite(); err != nil {
-				slog.Error(err)
+			err := application.Ignite()
+			if err != nil {
+				slog.Error(err.Error())
 			}
 		}(application)
 	}
@@ -80,7 +81,6 @@ func (c *cycle) Ignite() error {
 
 	_ = c.Stop()
 
-	
 	return nil
 }
 
@@ -89,7 +89,8 @@ func (c *cycle) Stop() error {
 	slog.Info("Stopping applications with graceful shutdown")
 	close(c.shutdown)
 	for _, application := range c.applications {
-		if err := application.Stop(); err != nil {
+    err := application.Stop()
+		if err != nil {
 			return err
 		}
 	}

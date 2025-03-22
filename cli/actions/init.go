@@ -22,8 +22,6 @@ func NewInitialization(name string) Initialization {
 		fmt.Println("Error launching form:", err)
 		os.Exit(1)
 	}
-	view.Repository = name
-	view.Version = "latest"
 	return Initialization{
 		URL:     view.Repository,
 		Name:    name,

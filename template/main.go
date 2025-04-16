@@ -3,8 +3,9 @@ package main
 import (
 	"log/slog"
 	"os"
-)
 
+	"github.com/Courtcircuits/optique/template/config"
+)
 
 // @title Optique application TO CHANGE
 // @version 1.0

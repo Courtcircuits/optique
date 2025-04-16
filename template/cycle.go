@@ -5,6 +5,9 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/Courtcircuits/optique/template/application"
+	"github.com/Courtcircuits/optique/template/infrastructure"
 )
 
 // Cycle is the component in charge of the life cycle of the application
@@ -17,16 +20,16 @@ type Cycle interface {
 }
 
 type cycle struct {
-	repos []infrastructure.Repository
-	apps []application.Application
-	shutdown     chan os.Signal
+	repos    []infrastructure.Repository
+	apps     []application.Application
+	shutdown chan os.Signal
 }
 
 func NewCycle() *cycle {
 	return &cycle{
-		shutdown:     make(chan os.Signal, 1),
-		repos: []infrastructure.Repository{},
-		apps: []application.Application{},
+		shutdown: make(chan os.Signal, 1),
+		repos:    []infrastructure.Repository{},
+		apps:     []application.Application{},
 	}
 }
 
@@ -89,7 +92,7 @@ func (c *cycle) Stop() error {
 	slog.Info("Stopping applications with graceful shutdown")
 	close(c.shutdown)
 	for _, app := range c.apps {
-    err := app.Stop()
+		err := app.Stop()
 		if err != nil {
 			return err
 		}

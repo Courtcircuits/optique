@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
-	"text/template"
 
 	"github.com/Courtcircuits/optique/cli/views"
+	"github.com/dolmen-go/codegen"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func GenerateFromForm(name string) {
@@ -51,9 +52,10 @@ func CreateModuleFolder(name string) error {
 
 type ModuleTemplate struct {
 	NameCapitalized string
-	Name            string `json:"name"`
-	Type            string `json:"type"`
-	URL             string `json:"url"`
+	Name            string   `json:"name"`
+	Type            string   `json:"type"`
+	URL             string   `json:"url"`
+	Ignore          []string `json:"ignore"`
 }
 
 const MODULE_TPL = `package {{.Name}}
@@ -76,21 +78,16 @@ func (m *{{.NameCapitalized}}) Stop() error {
 `
 
 func CreateRepositoryCode(name string) error {
-	template_content := ModuleTemplate{
-		Name:            name,
-		NameCapitalized: strings.Title(name),
-	}
-
-	tpl, err := template.New("module").Parse(MODULE_TPL)
-	if err != nil {
-		return err
-	}
-	f, err := os.Create(name + ".go")
-	if err != nil {
-		return err
-	}
-
-	return tpl.Execute(f, template_content)
+	return codegen.MustParse(MODULE_TPL).
+		CreateFile(
+			name+".go",
+			map[string]any{
+				"Name":            name,
+				"NameCapitalized": cases.Title(language.English).String(name),
+				"Type":            "git",
+				"URL":             "https://github.com/Courtcircuits/optique-module-template",
+			},
+		)
 }
 
 func CreateRepositoryManifestFile(name string, rtype string, url string) error {

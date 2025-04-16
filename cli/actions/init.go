@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -27,7 +28,26 @@ func NewInitialization(name string) Initialization {
 		Name:    name,
 		Version: view.Version,
 	}
+}
 
+type ProjectOptiqueConfig struct {
+	Ignore []string `json:"ignore"`
+}
+
+func GetOptiqueConfig() ProjectOptiqueConfig {
+	config := ProjectOptiqueConfig{}
+	optiqueConfigFile := "optique.json"
+	optiqueConfig, err := os.ReadFile(optiqueConfigFile)
+	if err != nil {
+		fmt.Println("Error reading config file:", err)
+		os.Exit(1)
+	}
+	err = json.Unmarshal(optiqueConfig, &config)
+	if err != nil {
+		fmt.Println("Error unmarshalling config file:", err)
+		os.Exit(1)
+	}
+	return config
 }
 
 func Initialize(generation Initialization) {
@@ -151,6 +171,12 @@ func setupGoModule(config *Initialization) error {
 		return err
 	}
 	fmt.Printf("Module initialized: %s\n", config.URL)
+
+	err = ReplaceInAllFiles(URL+"/template", config.URL)
+
+	if err != nil {
+		return err
+	}
 
 	for _, file := range IMPORT_TO_FIX {
 		ExecWithLoading(fmt.Sprintf("Fixing imports for %s\n", file), "gopls", "imports", "-w", file)

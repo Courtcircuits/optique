@@ -16,6 +16,7 @@ type Initialization struct {
 }
 
 var URL = "https://github.com/Courtcircuits/optique"
+var DEFAULT_MODULE = "github.com/Courtcircuits/optique"
 
 func NewInitialization(name string) Initialization {
 	view, err := views.LaunchInitForm()
@@ -165,18 +166,20 @@ func setupGoModule(config *Initialization) error {
 	if err != nil {
 		return err
 	}
+
+	if err:= ClearIgnoredFiles(); err != nil {
+		return err
+	}
+	if err := ReplaceInAllFiles(DEFAULT_MODULE+"/template", config.URL); err != nil {
+		return err
+	}
+	
 	fmt.Println("Current directory:", cur_dir)
 	err = ExecWithLoading("Initializing module", "go", "mod", "init", config.URL)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("Module initialized: %s\n", config.URL)
-
-	err = ReplaceInAllFiles(URL+"/template", config.URL)
-
-	if err != nil {
-		return err
-	}
 
 	for _, file := range IMPORT_TO_FIX {
 		ExecWithLoading(fmt.Sprintf("Fixing imports for %s\n", file), "gopls", "imports", "-w", file)

@@ -10,7 +10,7 @@ The power of **optique** is from the `module` system. It allows you to create a 
 E.g., optique doesn't come with a `database` module, by default, but you can create one by calling 
 
 ```bash
-optique generate pg-database
+optique gen sql
 ```
 
 This will create a new folder in your `infrastructure` folder with the name of the module you chose.And the cli will suggests how you can plug the database to your project.

@@ -2,17 +2,23 @@ package templates
 
 const INFRASTRUCTURE_TPL = `package {{.Name}}
 
-type {{.NameCapitalized}} struct {}
+type {{.NameCapitalized}} interface {
+	Setup() error
+	Shutdown() error
+	// Add more methods here
+}
 
-func New{{.NameCapitalized}}() (*{{.NameCapitalized}}, error) {
+type {{.Name}} struct {}
+
+func New{{.Name}}() ({{.NameCapitalized}}, error) {
   panic("implement me")
 }
 
-func (m *{{.NameCapitalized}}) Setup() error {
+func (m {{.Name}}) Setup() error {
   panic("implement me")
 }
 
-func (m *{{.NameCapitalized}}) Shutdown() error {
+func (m {{.Name}}) Shutdown() error {
   panic("implement me")
 }
 `

@@ -2,16 +2,39 @@ package actions
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+
+	"github.com/Courtcircuits/optique/cli/manifests"
+	"github.com/Courtcircuits/optique/cli/utils"
 )
 
-func AddModule(repo_url string, path string) {
-	data := SetUpSparseModule(repo_url, path)
+func AddModule(raw_url string) {
+	// first go to root of the project
+	root, err := FindOptiqueJson()
+	if err != nil {
+		fmt.Println("You are not in an optique project. To create a new one, run `optique init`")
+	}
+	os.Chdir(root)
+	// parse the url
+	repo_url, err := utils.ParseGitUrl(raw_url)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(repo_url)
+	data := SetUpSparseModule(repo_url.Repository, repo_url.Path)
+
+	os.Chdir(repo_url.Path)
+	if err := manifests.ClearIgnoredFiles(manifests.MODULE_MANIFEST); err != nil {
+		panic(err)
+	}
+	goBack()
 	CleanUpSparseModule()
 	goBack()
 	goBack()
-	MoveModule(".optique/tmp", data.Name)
+	MoveModule(".optique/tmp/"+repo_url.Path, data.Type+"/"+data.Name)
 	CleanUpOptique()
+	ExecWithLoading("Installing dependencies", "go", "mod", "tidy")
 }
 
 func SetUpSparseModule(repo_url string, path string) *ModuleTemplate {
@@ -25,6 +48,9 @@ func SetUpSparseModule(repo_url string, path string) *ModuleTemplate {
 	ExecWithLoading("Sparse-checking module", "git", "sparse-checkout", "init", "--cone")
 	ExecWithLoading("Setting up module", "git", "sparse-checkout", "set", path)
 	ExecWithLoading("Pulling module", "git", "pull", "origin", "main")
+	current_dir, _ := os.Getwd()
+	os.Chdir(path)
+	defer os.Chdir(current_dir)
 	return ParseModuleData()
 }
 
@@ -34,7 +60,11 @@ func CleanUpSparseModule() {
 
 func ParseModuleData() *ModuleTemplate {
 	// read config.json
-	fd, err := os.Open("config.json")
+	//get current directory
+	current_dir, _ := os.Getwd()
+	fmt.Println(current_dir)
+
+	fd, err := os.Open(manifests.MODULE_MANIFEST)
 	if err != nil {
 		panic(err)
 	}
@@ -49,9 +79,9 @@ func ParseModuleData() *ModuleTemplate {
 	return &data
 }
 
+// move module from tmp location to destination
 func MoveModule(path string, destination string) {
-	ExecWithLoading("Moving module", "mv", path, ".")
-	ExecWithLoading("Moving module", "mv", "tmp",destination)
+	ExecWithLoading("Moving module", "mv", path, destination)
 }
 
 func CleanUpOptique() {

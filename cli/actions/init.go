@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/Courtcircuits/optique/cli/manifests"
 	"github.com/Courtcircuits/optique/cli/views"
 )
 
@@ -32,12 +33,16 @@ func NewInitialization(name string) Initialization {
 }
 
 type ProjectOptiqueConfig struct {
+	Name string `json:"name"` //optique name
+	Module string `json:"module"` // golang module name
+	Repositories []string `json:"repositories"`
+	Applications []string `json:"applications"`
 	Ignore []string `json:"ignore"`
 }
 
 func GetOptiqueConfig() ProjectOptiqueConfig {
 	config := ProjectOptiqueConfig{}
-	optiqueConfigFile := "optique.json"
+	optiqueConfigFile :=manifests.PROJECT_MANIFEST
 	optiqueConfig, err := os.ReadFile(optiqueConfigFile)
 	if err != nil {
 		fmt.Println("Error reading config file:", err)
@@ -160,6 +165,30 @@ var IMPORT_TO_FIX = []string{
 	"./cycle.go",
 }
 
+func genProjectManifest(config *Initialization) error {
+	manifest := ProjectOptiqueConfig{
+		Name: config.Name,
+		Module: config.URL,
+		Ignore: []string{
+			"go.mod",
+			"go.sum",
+		},
+		Repositories: []string{},
+		Applications: []string{},
+	}
+	manifest_json, err := json.Marshal(&manifest)
+	if err != nil {
+		return err
+	}
+	f, err := os.Create(manifests.PROJECT_MANIFEST)
+	defer f.Close()
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(manifest_json)
+	return err
+}
+
 func setupGoModule(config *Initialization) error {
 	// go to project folder
 	cur_dir, err := os.Getwd()
@@ -167,7 +196,7 @@ func setupGoModule(config *Initialization) error {
 		return err
 	}
 
-	if err:= ClearIgnoredFiles(); err != nil {
+	if err:= manifests.ClearIgnoredFiles(manifests.PROJECT_MANIFEST); err != nil {
 		return err
 	}
 	if err := ReplaceInAllFiles(DEFAULT_MODULE+"/template", config.URL); err != nil {
@@ -185,6 +214,10 @@ func setupGoModule(config *Initialization) error {
 		ExecWithLoading(fmt.Sprintf("Fixing imports for %s\n", file), "gopls", "imports", "-w", file)
 	}
 	ExecWithLoading("Installing dependencies", "go", "mod", "tidy")
+
+	if err := genProjectManifest(config); err != nil {
+		return err
+	}
 
 	return nil
 }

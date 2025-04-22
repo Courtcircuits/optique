@@ -1,7 +1,7 @@
 {
   "ignore": [
-    "optique.json",
     "go.mod",
-    "go.sum"
+    "go.sum",
+    "optique.json"
   ]
 }

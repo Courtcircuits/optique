@@ -6,10 +6,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Courtcircuits/optique/cli/manifests"
+	"github.com/Courtcircuits/optique/cli/templates"
 	"github.com/Courtcircuits/optique/cli/views"
-	"github.com/dolmen-go/codegen"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
+)
+
+type ModuleType string
+
+const (
+	APPLICATION    ModuleType = "application"
+	INFRASTRUCTURE ModuleType = "infrastructure"
 )
 
 func GenerateFromForm(name string) {
@@ -19,27 +25,50 @@ func GenerateFromForm(name string) {
 		fmt.Println("Error launching form")
 		os.Exit(1)
 	}
-	if err := Generate(name, view.Type, view.URL); err != nil {
-		fmt.Println("Error generating module 2", err)
+	var rtype ModuleType
+	if view.Type == "application" {
+		rtype = APPLICATION
+	} else if view.Type == "infrastructure" {
+		rtype = INFRASTRUCTURE
+	} else {
+		fmt.Println("Error generating module", err)
+		fmt.Println("Error launching form")
+		os.Exit(1)
+	}
+	if err := Generate(name, rtype, view.URL); err != nil {
+		fmt.Println("Error generating module", err)
+		fmt.Println("Error launching form")
+		os.Exit(1)
+	}
+
+	if err := GoModInit(view.URL); err != nil {
+		fmt.Println("Error generating module", err)
 		fmt.Println("Error launching form")
 		os.Exit(1)
 	}
 }
 
-func Generate(name string, rtype string, url string) error {
-	if err := CreateModuleFolder(name); err != nil {
+func Generate(name string, rtype ModuleType, url string) error {
+	if err := CreateModuleFolder(name); err != nil { // goes into the module folder
 		return err
 	}
 
-	if err := CreateRepositoryManifestFile(name, rtype, url); err != nil {
+	if err := CreateRepositoryManifestFile(name, string(rtype), url); err != nil {
 		return err
 	}
 
-	if err := CreateRepositoryCode(name); err != nil {
-		return err
+	var code_opts *CodeGenerationOptions
+
+	switch rtype {
+	case APPLICATION:
+		code_opts = CodeGenOpts(name, url, templates.APPLICATION_TPL)
+	case INFRASTRUCTURE:
+		code_opts = CodeGenOpts(name, url, templates.INFRASTRUCTURE_TPL)
+	default:
+		return fmt.Errorf("invalid module type: %s", rtype)
 	}
 
-	return nil
+	return GenerateCode(code_opts)
 }
 
 func CreateModuleFolder(name string) error {
@@ -51,58 +80,29 @@ func CreateModuleFolder(name string) error {
 }
 
 type ModuleTemplate struct {
-	NameCapitalized string
-	Name            string   `json:"name"`
-	Type            string   `json:"type"`
-	URL             string   `json:"url"`
-	Ignore          []string `json:"ignore"`
-}
-
-const MODULE_TPL = `package {{.Name}}
-
-// please implement the Repository interface
-
-type {{.NameCapitalized }} struct {}
-
-func New{{.NameCapitalized}}() (*{{.NameCapitalized}}, error) {
-  panic("implement me")
-}
-
-func (m *{{.NameCapitalized}}) Bootstrap() error {
-  panic("implement me")
-}
-
-func (m *{{.NameCapitalized}}) Stop() error {
-  panic("implement me")
-}
-`
-
-func CreateRepositoryCode(name string) error {
-	return codegen.MustParse(MODULE_TPL).
-		CreateFile(
-			name+".go",
-			map[string]any{
-				"Name":            name,
-				"NameCapitalized": cases.Title(language.English).String(name),
-				"Type":            "git",
-				"URL":             "https://github.com/Courtcircuits/optique-module-template",
-			},
-		)
+	Name   string   `json:"name"`
+	Type   string   `json:"type"`
+	URL    string   `json:"url"`
+	Ignore []string `json:"ignore"`
 }
 
 func CreateRepositoryManifestFile(name string, rtype string, url string) error {
 	template_content := ModuleTemplate{
-		Name: name,
-		Type: rtype,
-		URL:  url,
+		Name:   name,
+		Type:   rtype,
+		URL:    url,
+		Ignore: []string{
+			"go.mod",
+			"go.sum",
+		},
 	}
 
-	template, err := json.Marshal(&template_content)
+	template, err := json.MarshalIndent(&template_content, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	f, err := os.Create("config.json")
+	f, err := os.Create(manifests.MODULE_MANIFEST)
 	defer f.Close()
 	if err != nil {
 		return err
@@ -112,3 +112,8 @@ func CreateRepositoryManifestFile(name string, rtype string, url string) error {
 
 	return err
 }
+
+func GoModInit(url string) error {
+	return ExecWithLoading("Initializing go.mod", "go", "mod", "init", url)
+}
+

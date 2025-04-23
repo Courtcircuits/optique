@@ -23,7 +23,7 @@ func main() {
 	if conf.Bootstrap {
 		err := cycle.Setup()
 		if err != nil {
-			slog.Error(err.Error())
+			log.Error(err.Error())
 			cycle.Stop()
 			os.Exit(1)
 		}

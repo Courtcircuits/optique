@@ -1,34 +1,50 @@
 package log
 
 import (
+	"os"
+
+	"github.com/Courtcircuits/optique/core"
 	"github.com/gookit/color"
 )
 
 type LogLevel string
 
 const (
-	InfoLevel LogLevel = "info"
+	InfoLevel  LogLevel = "info"
 	ErrorLevel LogLevel = "error"
 	DebugLevel LogLevel = "debug"
 )
 
 func Init() error {
-
+	root, err := core.FindOptiqueJson()
+	if err != nil {
+		return err
+	}
+	manifest, err := core.ReadProjectManifestAt(root + "/" + core.PROJECT_MANIFEST)
+	os.Setenv("OPTIQUE_SERVICE", manifest.Name)
 	return nil
 }
 
 func Info(msg string) {
 	Log(&LogOptions{
 		Level:   InfoLevel,
-		Service: "optique",
+		Service: RetrieveServiceName(),
 		Message: msg,
 	})
+}
+
+func RetrieveServiceName() string {
+	service, ok := os.LookupEnv("OPTIQUE_SERVICE")
+	if !ok {
+		service = "optique"
+	}
+	return service
 }
 
 func Error(msg string) {
 	Log(&LogOptions{
 		Level:   ErrorLevel,
-		Service: "optique",
+		Service: RetrieveServiceName(),
 		Message: msg,
 	})
 }
@@ -36,7 +52,7 @@ func Error(msg string) {
 func Debug(msg string) {
 	Log(&LogOptions{
 		Level:   DebugLevel,
-		Service: "optique",
+		Service: RetrieveServiceName(),
 		Message: msg,
 	})
 }
@@ -63,4 +79,3 @@ func Log(options *LogOptions) {
 		color.New(color.FgGray.Light()).Print(options.Service)
 	}
 }
-

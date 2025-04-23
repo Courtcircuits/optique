@@ -33,29 +33,7 @@ func NewInitialization(name string) Initialization {
 	}
 }
 
-type ProjectOptiqueConfig struct {
-	Name string `json:"name"` //optique name
-	Module string `json:"module"` // golang module name
-	Repositories []string `json:"repositories"`
-	Applications []string `json:"applications"`
-	Ignore []string `json:"ignore"`
-}
 
-func GetOptiqueConfig() ProjectOptiqueConfig {
-	config := ProjectOptiqueConfig{}
-	optiqueConfigFile :=core.PROJECT_MANIFEST
-	optiqueConfig, err := os.ReadFile(optiqueConfigFile)
-	if err != nil {
-		fmt.Println("Error reading config file:", err)
-		os.Exit(1)
-	}
-	err = json.Unmarshal(optiqueConfig, &config)
-	if err != nil {
-		fmt.Println("Error unmarshalling config file:", err)
-		os.Exit(1)
-	}
-	return config
-}
 
 func Initialize(generation Initialization) {
 	err := createProjectFolder(generation.Name)
@@ -167,7 +145,7 @@ var IMPORT_TO_FIX = []string{
 }
 
 func genProjectManifest(config *Initialization) error {
-	manifest := ProjectOptiqueConfig{
+	manifest := core.OptiqueProjectManifest{
 		Name: config.Name,
 		Module: config.URL,
 		Ignore: []string{

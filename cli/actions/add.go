@@ -38,7 +38,7 @@ func AddModule(raw_url string) {
 	ExecWithLoading("Installing dependencies", "go", "mod", "tidy")
 }
 
-func SetUpSparseModule(repo_url string, path string) *ModuleTemplate {
+func SetUpSparseModule(repo_url string, path string) *core.OptiqueModuleManifest {
 	//create temp folder
 	os.Mkdir(".optique", os.ModePerm)
 	os.Chdir(".optique")
@@ -59,7 +59,7 @@ func CleanUpSparseModule() {
 	os.RemoveAll(".git")
 }
 
-func ParseModuleData() *ModuleTemplate {
+func ParseModuleData() *core.OptiqueModuleManifest {
 	// read config.json
 	//get current directory
 	current_dir, _ := os.Getwd()
@@ -71,7 +71,7 @@ func ParseModuleData() *ModuleTemplate {
 	}
 	defer fd.Close()
 
-	var data ModuleTemplate
+	var data core.OptiqueModuleManifest
 	err = json.NewDecoder(fd).Decode(&data)
 	if err != nil {
 		panic(err)

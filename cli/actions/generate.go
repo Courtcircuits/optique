@@ -79,15 +79,9 @@ func CreateModuleFolder(name string) error {
 	return os.Chdir(name)
 }
 
-type ModuleTemplate struct {
-	Name   string   `json:"name"`
-	Type   string   `json:"type"`
-	URL    string   `json:"url"`
-	Ignore []string `json:"ignore"`
-}
 
 func CreateRepositoryManifestFile(name string, rtype string, url string) error {
-	template_content := ModuleTemplate{
+	template_content := core.OptiqueModuleManifest{
 		Name:   name,
 		Type:   rtype,
 		URL:    url,

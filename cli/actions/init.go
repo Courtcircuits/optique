@@ -8,6 +8,7 @@ import (
 
 	"github.com/Courtcircuits/optique/cli/manifests"
 	"github.com/Courtcircuits/optique/cli/views"
+	"github.com/Courtcircuits/optique/core"
 )
 
 type Initialization struct {
@@ -42,7 +43,7 @@ type ProjectOptiqueConfig struct {
 
 func GetOptiqueConfig() ProjectOptiqueConfig {
 	config := ProjectOptiqueConfig{}
-	optiqueConfigFile :=manifests.PROJECT_MANIFEST
+	optiqueConfigFile :=core.PROJECT_MANIFEST
 	optiqueConfig, err := os.ReadFile(optiqueConfigFile)
 	if err != nil {
 		fmt.Println("Error reading config file:", err)
@@ -180,7 +181,7 @@ func genProjectManifest(config *Initialization) error {
 	if err != nil {
 		return err
 	}
-	f, err := os.Create(manifests.PROJECT_MANIFEST)
+	f, err := os.Create(core.PROJECT_MANIFEST)
 	defer f.Close()
 	if err != nil {
 		return err
@@ -196,7 +197,7 @@ func setupGoModule(config *Initialization) error {
 		return err
 	}
 
-	if err:= manifests.ClearIgnoredFiles(manifests.PROJECT_MANIFEST); err != nil {
+	if err:= manifests.ClearIgnoredFiles(core.PROJECT_MANIFEST); err != nil {
 		return err
 	}
 	if err := ReplaceInAllFiles(DEFAULT_MODULE+"/template", config.URL); err != nil {

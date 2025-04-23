@@ -7,11 +7,12 @@ import (
 
 	"github.com/Courtcircuits/optique/cli/manifests"
 	"github.com/Courtcircuits/optique/cli/utils"
+	"github.com/Courtcircuits/optique/core"
 )
 
 func AddModule(raw_url string) {
 	// first go to root of the project
-	root, err := FindOptiqueJson()
+	root, err := core.FindOptiqueJson()
 	if err != nil {
 		fmt.Println("You are not in an optique project. To create a new one, run `optique init`")
 	}
@@ -25,7 +26,7 @@ func AddModule(raw_url string) {
 	data := SetUpSparseModule(repo_url.Repository, repo_url.Path)
 
 	os.Chdir(repo_url.Path)
-	if err := manifests.ClearIgnoredFiles(manifests.MODULE_MANIFEST); err != nil {
+	if err := manifests.ClearIgnoredFiles(core.MODULE_MANIFEST); err != nil {
 		panic(err)
 	}
 	goBack()
@@ -64,7 +65,7 @@ func ParseModuleData() *ModuleTemplate {
 	current_dir, _ := os.Getwd()
 	fmt.Println(current_dir)
 
-	fd, err := os.Open(manifests.MODULE_MANIFEST)
+	fd, err := os.Open(core.MODULE_MANIFEST)
 	if err != nil {
 		panic(err)
 	}

@@ -1,12 +1,11 @@
-package actions
+package core
+
 
 import (
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/Courtcircuits/optique/cli/manifests"
 )
 
 // find the location of optique.json since it is the root of the project
@@ -14,7 +13,7 @@ func FindOptiqueJson() (string, error) {
 	// first check in current level
 	current_path, err := os.Getwd()
 
-	matches, err := filepath.Glob(fmt.Sprintf("%s/%s", current_path, manifests.PROJECT_MANIFEST))
+	matches, err := filepath.Glob(fmt.Sprintf("%s/%s", current_path, PROJECT_MANIFEST))
 	if matches != nil && len(matches) > 0 {
 		fmt.Println(matches)
 		return matches[0], nil
@@ -30,7 +29,7 @@ func FindOptiqueJson() (string, error) {
 		if current_path == "/" {
 			return "", ERR_NO_OPTIQUE_JSON
 		}
-		matches, err = filepath.Glob(fmt.Sprintf("%s/%s", current_path, manifests.PROJECT_MANIFEST))
+		matches, err = filepath.Glob(fmt.Sprintf("%s/%s", current_path, PROJECT_MANIFEST))
 		if err != nil {
 			return "", err
 		}

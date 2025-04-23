@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Courtcircuits/optique/cli/manifests"
 	"github.com/Courtcircuits/optique/cli/templates"
 	"github.com/Courtcircuits/optique/cli/views"
+	"github.com/Courtcircuits/optique/core"
 )
 
 type ModuleType string
@@ -102,7 +102,7 @@ func CreateRepositoryManifestFile(name string, rtype string, url string) error {
 		return err
 	}
 
-	f, err := os.Create(manifests.MODULE_MANIFEST)
+	f, err := os.Create(core.MODULE_MANIFEST)
 	defer f.Close()
 	if err != nil {
 		return err
